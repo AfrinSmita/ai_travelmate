@@ -9,28 +9,31 @@ class TripPlannerScreen extends StatefulWidget {
 }
 
 class _TripPlannerScreenState extends State<TripPlannerScreen> {
-  final TextEditingController _cityCtrl = TextEditingController();
-  final TextEditingController _daysCtrl = TextEditingController();
-  final TextEditingController _peopleCtrl = TextEditingController();
+  final _cityCtrl = TextEditingController();
+  final _daysCtrl = TextEditingController(text: "3");
+  final _peopleCtrl = TextEditingController(text: "2");
 
   String? aiPlan;
   bool loading = false;
 
-  // -----------------------
-  // AI TRIP PLANNER FUNCTION
-  // -----------------------
-  void generatePlan() async {
+  Future<void> _generatePlan() async {
+    if (_cityCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Enter a city")));
+      return;
+    }
+
     setState(() => loading = true);
 
-    final text = await AIService.generatePlan(
+    final result = await AIService.generatePlan(
       _cityCtrl.text.trim(),
-      int.tryParse(_daysCtrl.text.trim()) ?? 3,
-      int.tryParse(_peopleCtrl.text.trim()) ?? 2,
+      int.tryParse(_daysCtrl.text) ?? 3,
+      int.tryParse(_peopleCtrl.text) ?? 2,
     );
 
     setState(() {
-      aiPlan = text;
       loading = false;
+      aiPlan = result;
     });
   }
 
@@ -38,70 +41,49 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("AI Trip Planner")),
-      body: SingleChildScrollView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
               controller: _cityCtrl,
               decoration: const InputDecoration(
-                labelText: "City / Country",
-                border: OutlineInputBorder(),
-              ),
+                  labelText: "Destination", border: OutlineInputBorder()),
             ),
             const SizedBox(height: 12),
-
-            TextField(
-              controller: _daysCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Number of Days",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: _peopleCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Number of People",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: loading ? null : generatePlan,
-                child: loading
-                    ? const CircularProgressIndicator()
-                    : const Text("Generate Trip Itinerary"),
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            if (aiPlan != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      blurRadius: 8,
-                      color: Colors.black.withOpacity(0.1),
-                    )
-                  ],
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _daysCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: "Days", border: OutlineInputBorder()),
+                  ),
                 ),
-                child: Text(
-                  aiPlan!,
-                  style: const TextStyle(fontSize: 15, height: 1.4),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _peopleCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: "People", border: OutlineInputBorder()),
+                  ),
                 ),
-              ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: loading ? null : _generatePlan,
+              child: Text(loading ? "Generating..." : "Generate Plan"),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: aiPlan == null
+                  ? const Center(child: Text("Your AI plan will appear here"))
+                  : SingleChildScrollView(
+                      child: Text(aiPlan!, style: const TextStyle(fontSize: 16))),
+            ),
           ],
         ),
       ),

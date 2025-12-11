@@ -3,49 +3,104 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AIService {
-  static final String apiKey = dotenv.env['GEMINI_API_KEY'] ?? "";
-  static const String model = "gemini-2.0-flash";
-  static String get url =>
-      "https://generativelanguage.googleapis.com/v1beta/models/$model:generateContent?key=$apiKey";
 
+  static final String _groqKey = dotenv.env['GROQ_API_KEY'] ?? "";
 
-  static Future<String> generatePlan(String location, int days, int people) async {
+  static const String _url = "https://api.groq.com/openai/v1/chat/completions";
+
+  static const String _model = "llama-3.1-8b-instant";
+
+  static Future<String> _askGroq(String prompt) async {
+    if (_groqKey.isEmpty) {
+      return "GROQ_API_KEY missing. Please add it in the .env file.";
+    }
+
+    try {
+      final body = {
+        "model": _model,
+        "messages": [
+          {
+            "role": "system",
+            "content":
+                "You are a helpful and friendly travel assistant. Answer clearly."
+          },
+          {
+            "role": "user",
+            "content": prompt,
+          },
+        ],
+        "temperature": 0.7,
+        "max_tokens": 1500,
+      };
+
+      final response = await http.post(
+        Uri.parse(_url),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $_groqKey",
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final content = data["choices"]?[0]?["message"]?["content"];
+        if (content is String && content.isNotEmpty) {
+          return content;
+        }
+        return "AI response was empty. Please try again.";
+      }
+
+      if (response.statusCode == 401) {
+        return "Invalid or missing Groq API key. Please check your GROQ_API_KEY.";
+      }
+      if (response.statusCode == 429) {
+        return "Too many requests to Groq right now. Please wait a bit and try again.";
+      }
+      if (response.statusCode == 400) {
+        return "The AI request was invalid. Please try again with simpler input.";
+      }
+
+      return "AI error (${response.statusCode}). Please try again later.";
+    } catch (e) {
+      return "Network error while calling AI: $e";
+    }
+  }
+
+  /// 🧳 Trip plan generator
+  static Future<String> generatePlan(
+      String location, int days, int people) async {
     final prompt = """
-Create a detailed travel itinerary:
+Create a detailed travel itinerary.
 
 Location: $location
-Days: $days
-People: $people
+Trip length: $days day(s)
+Travelers: $people
 
-Include:
-- Day-by-day plan
-- Hourly activities
-- Total budget + breakdown
-- Hotels (budget)
-- Food recommendations
-- Weather advice
-- Packing list
+Return with clear headings and bullet points:
+
+1. Short trip summary
+2. Day-by-day plan (Morning / Afternoon / Evening)
+3. Must-visit places (with one-line reasons)
+4. Budget estimate (total + breakdown: stay, food, transport, tickets)
+5. 3–5 budget-friendly hotel suggestions (with approximate price range)
+6. Local foods to try
+7. Transport & safety tips
+8. Packing checklist
 """;
 
-    final body = {
-      "contents": [
-        {
-          "parts": [{"text": prompt}]
-        }
-      ]
-    };
+    return _askGroq(prompt);
+  }
 
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(body),
-    );
+  /// 💬 Chat reply for TravelChatScreen
+  static Future<String> chatReply(String message) async {
+    final prompt = """
+You are a friendly travel chat assistant.
+Keep answers short, clear and helpful (3–6 sentences).
 
-    if (response.statusCode == 200) {
-      final json = jsonDecode(response.body);
-      return json["candidates"][0]["content"]["parts"][0]["text"];
-    } else {
-      return "Error: ${response.body}";
-    }
+User: $message
+""";
+
+    return _askGroq(prompt);
   }
 }
