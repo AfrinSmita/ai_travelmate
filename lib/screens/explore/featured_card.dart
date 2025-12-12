@@ -1,4 +1,4 @@
-// lib/screens/explore/featured_card.dart
+
 import 'package:flutter/material.dart';
 import '../../models/destination.dart';
 

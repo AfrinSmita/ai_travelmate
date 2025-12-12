@@ -1,4 +1,4 @@
-// lib/screens/explore/destination_card.dart
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -22,12 +22,14 @@ class DestinationCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Stack(
           children: [
+             // ---------- BACKGROUND IMAGE ----------
             Positioned.fill(
               child: Image.network(
                 destination.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
+             // ---------- DARK GRADIENT OVERLAY ----------
             Positioned.fill(
               child: Container(
                 decoration: const BoxDecoration(
@@ -39,6 +41,7 @@ class DestinationCard extends StatelessWidget {
                 ),
               ),
             ),
+            // ----------Category Text----------------
             Positioned(
               top: 10,
               left: 10,
@@ -58,6 +61,7 @@ class DestinationCard extends StatelessWidget {
                 ),
               ),
             ),
+             // ---------- BOTTOM INFO GLASS BOX ----------
             Positioned(
               left: 10,
               right: 10,
@@ -66,7 +70,9 @@ class DestinationCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
+                  
+                  // --------------------container with icons------------
+                  child: Container(     
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.55),
@@ -108,6 +114,7 @@ class DestinationCard extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
+                            // ---------------star & rating---------------------
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 6,
@@ -117,8 +124,9 @@ class DestinationCard extends StatelessWidget {
                                 color: Colors.black.withOpacity(0.6),
                                 borderRadius: BorderRadius.circular(12),
                               ),
+                              
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                                // mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(
                                     Icons.star_rounded,

@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -51,19 +50,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         email: email,
         password: password,
       );
-      if (mounted) Navigator.of(context).pop(); // go back to login
+
+      if (mounted) Navigator.of(context).pop(); // back to login screen
+
     } on FirebaseAuthException catch (e) {
-      setState(() {
-        _error = e.message ?? "Failed to create account.";
-      });
+      setState(() => _error = e.message ?? "Failed to create account.");
     } catch (_) {
-      setState(() {
-        _error = "Something went wrong. Please try again.";
-      });
+      setState(() => _error = "Something went wrong. Try again.");
     } finally {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -71,30 +66,47 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: const Text("Create account"),
+        title: const Text(
+          "Create Account",
+          style: TextStyle(color: Colors.white),
+        ),
+        elevation: 0,
       ),
+
       body: Stack(
         children: [
+          // 🔥 Background image (same as login)
+          Positioned.fill(
+            child: Image.network(
+              'https://images.pexels.com/photos/2404370/pexels-photo-2404370.jpeg',
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // Dark gradient overlay
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Color(0xFF050816),
-                    Color(0xFF09152B),
+                    Colors.black.withOpacity(0.82),
+                    Colors.black.withOpacity(0.55),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
                 ),
               ),
             ),
           ),
+
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Center(
+              child: Align(
+                alignment: Alignment.bottomCenter,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(22),
                   child: BackdropFilter(
@@ -106,87 +118,93 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         color: Colors.white.withOpacity(0.08),
                         borderRadius: BorderRadius.circular(22),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withOpacity(0.12),
                         ),
                       ),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Join AI TravelMate',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+
+                          const Text(
+                            'Join AI TravelMate',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
-                            const SizedBox(height: 6),
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                'Create an account to save trips, journals and AI suggestions.',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.7),
-                                ),
-                              ),
+                          ),
+
+                          const SizedBox(height: 6),
+
+                          Text(
+                            "Create an account to save your AI trip plans, journals and travel chats.",
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.75),
                             ),
-                            if (_error != null) ...[
-                              const SizedBox(height: 12),
-                              Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  _error!,
-                                  style: const TextStyle(
-                                    color: Colors.redAccent,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 16),
-                            TextField(
-                              controller: _emailCtrl,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: const InputDecoration(
-                                labelText: 'Email',
-                                prefixIcon: Icon(Icons.mail_outline_rounded),
-                              ),
-                            ),
+                          ),
+
+                          if (_error != null) ...[
                             const SizedBox(height: 12),
-                            TextField(
-                              controller: _passwordCtrl,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock_outline_rounded),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: _confirmCtrl,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                labelText: 'Confirm password',
-                                prefixIcon: Icon(Icons.lock_reset_rounded),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton(
-                                onPressed: _loading ? null : _signUp,
-                                child: Text(
-                                  _loading
-                                      ? 'Creating account…'
-                                      : 'Create account',
-                                ),
+                            Text(
+                              _error!,
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 13,
                               ),
                             ),
                           ],
-                        ),
+
+                          const SizedBox(height: 16),
+
+                          TextField(
+                            controller: _emailCtrl,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon: Icon(Icons.mail_outline_rounded),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          TextField(
+                            controller: _passwordCtrl,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Password',
+                              prefixIcon: Icon(Icons.lock_outline_rounded),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          TextField(
+                            controller: _confirmCtrl,
+                            obscureText: true,
+                            decoration: const InputDecoration(
+                              labelText: 'Confirm password',
+                              prefixIcon: Icon(Icons.lock_reset_rounded),
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: FilledButton(
+                              onPressed: _loading ? null : _signUp,
+                              child: Text(
+                                _loading
+                                    ? 'Creating account…'
+                                    : 'Create account',
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+                        ],
                       ),
                     ),
                   ),

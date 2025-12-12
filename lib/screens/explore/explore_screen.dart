@@ -1,4 +1,4 @@
-// lib/screens/explore/explore_screen.dart
+
 import 'package:flutter/material.dart';
 
 import '../../models/destination.dart';
@@ -101,7 +101,7 @@ class ExploreScreen extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
-                    textAlign: TextAlign.center,
+                    // textAlign: TextAlign.center,
                   ),
                 ),
               const SizedBox(height: 12),
